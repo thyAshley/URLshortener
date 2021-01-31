@@ -22,8 +22,20 @@ app.post("/shorten", async (req: Request, res: Response) => {
 
 app.get("/", async (req: Request, res: Response) => {
   const urls = await Url.find();
-  console.log(urls);
   res.render("index", { urls });
+});
+
+app.get("/:shortURL", async (req: Request, res: Response) => {
+  const { shortURL } = req.params;
+  try {
+    const url = await Url.findOne({ shortenedURL: shortURL });
+    if (!url) throw new Error("No url found");
+    url.clicks = url.clicks + 1;
+    await url.save();
+    res.redirect(url.originalURL);
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 export default app;
